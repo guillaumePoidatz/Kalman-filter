@@ -19,23 +19,24 @@ Px1x2=zeros(1,nepoch); %covariance
 X=zeros(n,1);
 P=100*eye(n,n);
 C = [1,0;0,1];
-Qv = 100000 % standard deviation of the noise on the model
-gps.sx = 40000
+Qv = 1; % standard deviation of the noise on the model
+
 for i=1:nepoch
     % first we compute the matrices of the model
-    Q = [dt(i)^2/4*Qv,0;0,Qv].^2; % random noise on the model
-    A = [1,dt(i);0,1]; % no command
+    Q = [1/4*Qv,0;0,Qv].^2; % random noise on the model
+    A = [1,1;0,1]; % no command
     R = [gps.sx,0;0,tachy.sv].^2; % random noise on the measurements
-    Y = gps.x(i);
+    Y = [gps.x(i);tachy.v(i)];
     % measurement update (estimation)
     % error on the estimation
-    epsilon1 = Y-C1*X;
-    epsilon2 = Y-C2*X;
-    K(1,:) = P*C(1,:)*1/(C(1,:)*P*C(1,:)'+R(1,:)); % Kalman gain (Pxy)*Py-1
-    K(2,:) = P*C(2,:)*1/(C(2,:)*P*C(2,:)'+R(2,:));
-    X1(1,:) = X(1,:)+K*epsilon(1,:); % update of X (Xk|k)
-    X2(2,:) = X(2,:)+K*epsilon(2,:);
-    P(1,:) = (eye(2)-K*C(1,:))*P*(1-K*C(1,:))'+K*R*K'; % cov matrix of the update (Pk|k)
+    epsilon(1,:) = Y(1,:)-C(1,:)*X;
+    epsilon(2,:) = Y(2,:)-C(2,:)*X;
+    K = P*C*1/(C*P*C'+R); % Kalman gain (Pxy)*Py-1
+    %K(2,:) = P(2,:)*C*1/(C*P*C'+R(2,:));
+    X(1,:) = X(1,:)+K(1,:)*epsilon; % update of X (Xk|k)
+    X(2,:) = X(2,:)+K(2,:)*epsilon;
+    P(1,:) = ([1,0]-K(1,:)*C)*P*(1-K*C)'+K(1,:)*R*K'; % cov matrix of the update (Pk|k)
+    P(2,:) = ([0,1]-K(2,:)*C)*P*(1-K*C)'+K(2,:)*R*K'; % cov matrix of the update (Pk|k)
     
     % Storage (corresponds to the output of the filter)
     Xs(:,i)=X;
@@ -44,10 +45,11 @@ for i=1:nepoch
     %...
     
     % time update (prediction)
-    X = A*X; % prediction (Xk|k-1)
-
+    X(1,:) = A(1,:)*X; % prediction (Xk|k-1)
+    X(2,:) = A(2,:)*X;
     % covariance matrix of the estimate
-    P = A*P*A'+Q; % cov matrix of the prediction (Pk|k-1)
+    P(1,:) = A(1,:)*P*A'+ Q(1,:); % cov matrix of the prediction (Pk|k-1)
+    P(2,:) = A(2,:)*P*A'+Q(2,:);
 
 
 

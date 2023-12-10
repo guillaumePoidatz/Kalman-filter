@@ -20,12 +20,11 @@ Px1x2=zeros(1,nepoch); %covariance
 X=zeros(n,1);
 P=100*eye(n,n);
 C = [1,0]
-Qv = 400000000000; % standard deviation of the noise on the model
-gps.sx = 200;
+Qv = 0.1; % standard deviation of the noise on the model
 for i=1:nepoch
     % first we compute the matrices of the model
-    Q = [dt(i)^2/4*Qv,0;0,Qv]; % random noise on the model
-    A = [1,dt(i);0,1]; % no command
+    Q = [1/4*Qv,0;0,Qv]; % random noise on the model
+    A = [1,1;0,1]; % no command
     R = gps.sx; % random noise on the measurements
     Y = gps.x(i);
     % measurement update (estimation)
