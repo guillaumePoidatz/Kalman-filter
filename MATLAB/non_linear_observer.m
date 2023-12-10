@@ -19,20 +19,20 @@ Px1x2=zeros(1,nepoch); %covariance
 % Initial state of the filter (to be changed)
 X=zeros(n,1);
 P=100*eye(n,n);
-Qv = 100000000000000; % standard deviation of the noise on the model (speed)
-Qd = 10000; % standard deviation of the noise on the model (distance)
+Qv = 1; % standard deviation of the noise on the model (speed)
+Qd = 10; % standard deviation of the noise on the model (distance)
 for i=1:nepoch
     % first we compute the matrices of the model
-    Q = [dt(i)^2/4*Qv,0,0;0,Qv,0;0,0,Qd]; % random noise on the model
-    A = [1,dt(i),0;0,1,0;0,0,1]; % no command
+    Q = [1/4*Qv,0,0;0,Qv,0;0,0,Qd]; % random noise on the model
+    A = [1,1,0;0,1,0;0,0,1]; % no command
     C = [(X(1)-gps.s1.x(i))/sqrt((gps.s1.x(i)-X(1))^2+gps.s1.y(i)^2),0,1;...
         (X(1)-gps.s2.x(i))/sqrt((gps.s2.x(i)-X(1))^2+gps.s2.y(i)^2),0,1;...
         (X(1)-gps.s3.x(i))/sqrt((gps.s3.x(i)-X(1))^2+gps.s3.y(i)^2),0,1;...
-        0,1,0]
+        0,1,0];
     G = [sqrt((gps.s1.x(i)-X(1))^2+gps.s1.y(i)^2)+X(3);sqrt((X(1)-gps.s2.x(i))^2+gps.s2.y(i)^2)+X(3);...
-        sqrt((X(1)-gps.s3.x(i))^2+gps.s3.y(i)^2)+X(3);X(2)]
+        sqrt((X(1)-gps.s3.x(i))^2+gps.s3.y(i)^2)+X(3);X(2)];
     R = [gps.s1.sPR,0,0,0;0,gps.s2.sPR,0,0;0,0,gps.s3.sPR,0;0,0,0,tachy.sv].^2; % random noise on the measurements
-    Y = [gps.s1.PR(i);gps.s2.PR(i);gps.s3.PR(i);tachy.v(i)]
+    Y = [gps.s1.PR(i);gps.s2.PR(i);gps.s3.PR(i);tachy.v(i)];
     % measurement update (estimation)
     % error on the estimation
     epsilon = Y-G;

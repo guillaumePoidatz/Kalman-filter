@@ -18,14 +18,14 @@ Px1x2=zeros(1,nepoch); %covariance
 
 % Initial state of the filter (to be changed)
 X=zeros(n,1);
-P=100*eye(n,n);
+P=300*eye(n,n);
 C = [1,0;0,1];
-Qv = 100000000000000 % variance of the noise on the model
-gps.sx = 5;
+Qv = 1; % variance of the noise on the model
+
 for i=1:nepoch
     % first we compute the matrices of the model
-    Q = [dt(i)^2/4*Qv,0;0,Qv]; % random noise on the model
-    A = [1,dt(i);0,1]; % no command
+    Q = [1/4*Qv,0;0,Qv]; % random noise on the model
+    A = [1,1;0,1]; % no command
     R = [gps.sx,0;0,tachy.sv].^2; % random noise on the measurements
     Y = [gps.x(i);tachy.v(i)];
     % measurement update (estimation)
